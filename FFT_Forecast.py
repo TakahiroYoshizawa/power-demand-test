@@ -9,8 +9,9 @@ import scipy.fftpack as fft
 from matplotlib import pyplot as plt
 from math import pi as pi
 import time
-from multiprocessing import Pool
-import multiprocessing as multi
+
+
+
 
 # データ読み込み関数
 def read_power_csv(csvname):
@@ -26,7 +27,7 @@ def read_power_csv(csvname):
 def make_tswave(df):
     '''
     :FUNCTION:log & delete trend
-    :return ts
+    :return t<s
     '''
     #logを取る
     log_ts = np.log(df['power'])
@@ -63,13 +64,9 @@ def do_fft(ts):
     fft_data = pd.DataFrame([power, freqs, phase]).T
     fft_data.columns = ['power', 'freqs', 'phase']
 
-    p = Pool(multi.cpu_count())
     #各行の周波数成分を用いて周波数ごとの波形を作成する
     X = fft_data.apply(lambda x: make_lassoX(x, len(fft_data)), axis=1).T
-    p.close()
-
-    print(X)
-    return X
+    return X, fft_data
 
 def make_lassoX(x, T):
     '''
@@ -107,8 +104,9 @@ def est_in_lasso(X, ts):
     print("score: ", score)
     print("likelihood: ", likelihood)
     print("logL: ", np.log(likelihood))
-    print("cpu", multi.cpu_count())
 
+
+    return coef
 
 '''
 def forcast():
