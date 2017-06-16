@@ -30,7 +30,7 @@ def make_tswave(df):
     :return t<s
     '''
     #logを取る
-    log_ts = np.log(df['power'])
+    log_ts = np.log(df['power'])[0:100]
 
     #indexを用いて回帰分析をする際に形を変えなければならない
     log_ts_index = np.array(log_ts.index).reshape(len(log_ts), 1)
@@ -120,7 +120,7 @@ def forcast(coef, intercept, fft_data, len_forcast):
 
     new = [sum(fft_data.apply(lambda x: make_forecast_by_freq(x,t), axis=1)) for t in range(L)]
 
-    forecast = np.log(new + intercept)
+    forecast = np.exp(new + intercept)
 
     return forecast
 
