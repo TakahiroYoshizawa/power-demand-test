@@ -7,7 +7,7 @@ import numpy as np
 from sklearn import linear_model as sklm
 import scipy.fftpack as fft
 from matplotlib import pyplot as plt
-from math import pi as pi
+from math import pi
 import time
 
 
@@ -41,7 +41,10 @@ def make_tswave(df):
 
     #残差を新たなtsとする
     ts = log_ts - trend_est_model.predict(log_ts_index)
-    return ts
+
+    log_mean = trend_est_model.intercept_
+
+    return ts, log_mean
 
 # 時系列データに高速フーリエ変換をかけ，周波数成分へ落とし込む．
 def do_fft(ts):
@@ -108,12 +111,19 @@ def est_in_lasso(X, ts):
 
     return coef
 
-'''
-def forcast():
-    for t in range(0, lenY+51):
-        average = 0
-        for coef, po, fr, ph in zip(results.coef_, power, freqs, phase):
-            average += coef * po * np.cos((2 * pi * fr) * t + ph) / (lenY+51)
-        qty_forecast.append(average)
 
-'''
+def forcast(coef, intercept, fft_data, len_forcast):
+    fft_data["coef"] = coef
+    print(fft_data)
+    L = len(fft_data) + len_forcast
+
+
+    new = [sum(fft_data.apply(lambda x: make_forecast_by_freq(x,t), axis=1)) for t in range(L)]
+
+    forecast = np.log(new + intercept)
+
+    return forecast
+
+def make_forecast_by_freq(x, t):
+    y = x['coef'] * x['power'] * np.cos((2 * pi * x['freqs']) * t + x['phase'])
+    return y
