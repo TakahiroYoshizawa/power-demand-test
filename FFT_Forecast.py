@@ -66,7 +66,7 @@ def do_fft(ts):
     #周波数データをデータフレームに格納
     fft_data = pd.DataFrame([power, freqs, phase]).T
     fft_data.columns = ['power', 'freqs', 'phase']
-
+    #todo 高速化
     #各行の周波数成分を用いて周波数ごとの波形を作成する
     X = fft_data.apply(lambda x: make_lassoX(x, len(fft_data)), axis=1).T
     return X, fft_data
@@ -117,7 +117,7 @@ def forcast(coef, intercept, fft_data, len_forcast):
     print(fft_data)
     L = len(fft_data) + len_forcast
 
-
+    #todo 高速化
     new = [sum(fft_data.apply(lambda x: make_forecast_by_freq(x,t), axis=1)) for t in range(L)]
 
     forecast = np.exp(new + intercept)
